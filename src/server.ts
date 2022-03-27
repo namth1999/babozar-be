@@ -1,6 +1,8 @@
 import express, {Express, NextFunction, Request, Response} from 'express';
 import http from 'http';
 import morgan from 'morgan';
+import ip from "ip";
+
 const bodyParser = require('body-parser');
 const brandRouter = require('./routes/brand.route');
 const addressRouter = require('./routes/address.route');
@@ -39,7 +41,7 @@ app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
     return res.status(200).json({
-        message: 'Hello from root'
+        message: `Hello from root ${ip.address("public")}`
     });
 });
 
