@@ -59,9 +59,7 @@ app.use("/tagproduct", keycloak.protect(), tagProductRouter);
 app.use("/orderproduct", keycloak.protect(), orderProductRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-    return res.status(404).json({
-        error: "Not Found",
-    });
+    return res.status(404).json("Not Found");
 });
 
 const httpServer = http.createServer(app);
