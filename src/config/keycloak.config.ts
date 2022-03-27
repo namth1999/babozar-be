@@ -1,4 +1,3 @@
-
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 
@@ -8,7 +7,7 @@ const memoryStore = new session.MemoryStore();
 let keycloakConfig = {
     clientId: 'BoroBazar',
     bearerOnly: true,
-    serverUrl: 'http://18.156.4.101:8080/auth',
+    serverUrl: 'http://ec2-3-65-36-66.eu-central-1.compute.amazonaws.com:8080/auth',
     realm: 'nodejs-keycloak-aws',
     credentials: {
         secret: 'hfpH5YM99OBtVY71DFiCAVbyptuYgKHf'
