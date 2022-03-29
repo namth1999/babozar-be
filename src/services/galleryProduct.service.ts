@@ -14,7 +14,6 @@ async function getPage(page = 1) {
 
     const exist =  await client.exists(environment.redisKeys.galleryProduct.getPage);
     if (!exist) {
-        console.log("querry");
         const result = await db.query(
             'fetch_gallery_product',
             `SELECT * FROM gallery_product LIMIT $1 OFFSET $2`,
@@ -36,7 +35,6 @@ async function getPage(page = 1) {
             meta
         };
     } else {
-        console.log("cache");
         const result = await client.get(environment.redisKeys.galleryProduct.getPage);
         if (result) {
             return JSON.parse(result);

@@ -14,7 +14,6 @@ async function getPage(page = 1) {
 
     const exist =  await client.exists(environment.redisKeys.brand.getPage);
     if (!exist) {
-        console.log("querry");
         const result = await db.query(
             'fetch_brands',
             `SELECT * FROM brand LIMIT $1 OFFSET $2`,
@@ -36,7 +35,6 @@ async function getPage(page = 1) {
             meta
         };
     } else {
-        console.log("cache");
         const result = await client.get(environment.redisKeys.brand.getPage);
         if (result) {
             return JSON.parse(result);
