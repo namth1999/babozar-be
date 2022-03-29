@@ -1,4 +1,7 @@
 import {TagProduct} from "../models/models";
+import client from "../config/redisCache.config";
+import {environment} from "../enviroment";
+import HttpException from "../utils/HttpException";
 
 const db = require('./db.service');
 const helper = require('../utils/helper.util');
@@ -9,18 +12,38 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const result = await db.query(
-        'fetch_tag_product',
-        `SELECT * FROM tag_product LIMIT $1 OFFSET $2`,
-        [config.itemsPerPage, offset]
-    );
-    const data = helper.emptyOrRows(result.rows)
-    const meta = {page};
+    const exist =  await client.exists(environment.redisKeys.tagProduct.getPage);
+    if (!exist) {
+        console.log("querry");
+        const result = await db.query(
+            'fetch_tag_product',
+            `SELECT * FROM tag_product LIMIT $1 OFFSET $2`,
+            [config.itemsPerPage, offset]
+        );
+        const data = helper.emptyOrRows(result.rows)
+        const meta = {page};
 
-    return {
-        data,
-        meta
-    };
+        await client.set(environment.redisKeys.tagProduct.getPage, JSON.stringify({
+            data,
+            meta
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+            meta
+        };
+    } else {
+        console.log("cache");
+        const result = await client.get(environment.redisKeys.tagProduct.getPage);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 async function create(tagProduct: TagProduct) {
@@ -39,8 +62,7 @@ async function create(tagProduct: TagProduct) {
 
     if (result) {
         message = 'tag_product created successfully';
-    } else {
-        message = 'Error in creating tag_product';
+        await client.del(environment.redisKeys.tagProduct.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);
@@ -73,8 +95,7 @@ async function createMultiple(tagsProduct: TagProduct[]) {
 
     if (result && result.rows.length > 0) {
         message = 'tags_product created successfully';
-    } else {
-        message = 'Error in creating tags_product';
+        await client.del(environment.redisKeys.tagProduct.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);

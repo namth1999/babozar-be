@@ -1,4 +1,7 @@
 import {Category} from "../models/models";
+import client from "../config/redisCache.config";
+import {environment} from "../enviroment";
+import HttpException from "../utils/HttpException";
 
 const db = require('./db.service');
 const helper = require('../utils/helper.util');
@@ -9,18 +12,38 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const result = await db.query(
-        'fetch_categories',
-        `SELECT * FROM category LIMIT $1 OFFSET $2`,
-        [config.itemsPerPage, offset]
-    );
-    const data = helper.emptyOrRows(result.rows)
-    const meta = {page};
+    const exist =  await client.exists(environment.redisKeys.category.getPage);
+    if (!exist) {
+        console.log("querry");
+        const result = await db.query(
+            'fetch_categories',
+            `SELECT * FROM category LIMIT $1 OFFSET $2`,
+            [config.itemsPerPage, offset]
+        );
+        const data = helper.emptyOrRows(result.rows)
+        const meta = {page};
 
-    return {
-        data,
-        meta
-    };
+        await client.set(environment.redisKeys.category.getPage, JSON.stringify({
+            data,
+            meta
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+            meta
+        };
+    } else {
+        console.log("cache");
+        const result = await client.get(environment.redisKeys.category.getPage);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 
@@ -40,8 +63,7 @@ async function create(category : Category) {
 
     if (result) {
         message = 'Category created successfully';
-    } else {
-        message = 'Error in creating category';
+        await client.del(environment.redisKeys.category.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);
@@ -77,8 +99,7 @@ async function createMultiple(categories: Category[]) {
 
     if (result && result.rows.length > 0) {
         message = 'categories created successfully';
-    } else {
-        message = 'Error in creating categories';
+        await client.del(environment.redisKeys.category.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);

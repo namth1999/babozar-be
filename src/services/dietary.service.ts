@@ -1,4 +1,7 @@
 import {Dietary} from "../models/models";
+import client from "../config/redisCache.config";
+import {environment} from "../enviroment";
+import HttpException from "../utils/HttpException";
 
 const db = require('./db.service');
 const helper = require('../utils/helper.util');
@@ -9,18 +12,38 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const result = await db.query(
-        'fetch_dietary',
-        `SELECT * FROM dietary LIMIT $1 OFFSET $2`,
-        [config.itemsPerPage, offset]
-    );
-    const data = helper.emptyOrRows(result.rows)
-    const meta = {page};
+    const exist =  await client.exists(environment.redisKeys.dietary.getPage);
+    if (!exist) {
+        console.log("querry");
+        const result = await db.query(
+            'fetch_dietary',
+            `SELECT * FROM dietary LIMIT $1 OFFSET $2`,
+            [config.itemsPerPage, offset]
+        );
+        const data = helper.emptyOrRows(result.rows)
+        const meta = {page};
 
-    return {
-        data,
-        meta
-    };
+        await client.set(environment.redisKeys.dietary.getPage, JSON.stringify({
+            data,
+            meta
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+            meta
+        };
+    } else {
+        console.log("cache");
+        const result = await client.get(environment.redisKeys.dietary.getPage);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 
@@ -43,8 +66,7 @@ async function create(dietary: Dietary) {
 
     if (result) {
         message = 'Dietary created successfully';
-    } else {
-        message = 'Error in creating dietary';
+        await client.del(environment.redisKeys.dietary.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);
@@ -77,8 +99,7 @@ async function createMultiple(dietaries: Dietary[]) {
 
     if (result && result.rows.length > 0) {
         message = 'Dietaries created successfully';
-    } else {
-        message = 'Error in creating dietaries';
+        await client.del(environment.redisKeys.dietary.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);

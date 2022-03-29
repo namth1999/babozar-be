@@ -1,4 +1,7 @@
 import {ChildrenCategory} from "../models/models";
+import client from "../config/redisCache.config";
+import {environment} from "../enviroment";
+import HttpException from "../utils/HttpException";
 
 const db = require('./db.service');
 const helper = require('../utils/helper.util');
@@ -9,18 +12,38 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const result = await db.query(
-        'fetch_children_category',
-        `SELECT * FROM children_category LIMIT $1 OFFSET $2`,
-        [config.itemsPerPage, offset]
-    );
-    const data = helper.emptyOrRows(result.rows)
-    const meta = {page};
+    const exist =  await client.exists(environment.redisKeys.childrenCategory.getPage);
+    if (!exist) {
+        console.log("querry");
+        const result = await db.query(
+            'fetch_children_category',
+            `SELECT * FROM children_category LIMIT $1 OFFSET $2`,
+            [config.itemsPerPage, offset]
+        );
+        const data = helper.emptyOrRows(result.rows)
+        const meta = {page};
 
-    return {
-        data,
-        meta
-    };
+        await client.set(environment.redisKeys.childrenCategory.getPage, JSON.stringify({
+            data,
+            meta
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+            meta
+        };
+    } else {
+        console.log("cache");
+        const result = await client.get(environment.redisKeys.childrenCategory.getPage);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 
@@ -44,8 +67,7 @@ async function create(childrenCategory : ChildrenCategory) {
 
     if (result) {
         message = 'childrenCategory created successfully';
-    } else {
-        message = 'Error in creating childrenCategory';
+        await client.del(environment.redisKeys.childrenCategory.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);
@@ -78,8 +100,7 @@ async function createMultiple(childrenCategories : ChildrenCategory[]) {
 
     if (result && result.rows.length > 0) {
         message = 'Children Categories created successfully';
-    } else {
-        message = 'Error in creating childrenCategories';
+        await client.del(environment.redisKeys.childrenCategory.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);

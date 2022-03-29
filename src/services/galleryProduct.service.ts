@@ -1,4 +1,7 @@
 import {GalleryProduct} from "../models/models";
+import client from "../config/redisCache.config";
+import {environment} from "../enviroment";
+import HttpException from "../utils/HttpException";
 
 const db = require('./db.service');
 const helper = require('../utils/helper.util');
@@ -9,18 +12,38 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const result = await db.query(
-        'fetch_gallery_product',
-        `SELECT * FROM gallery_product LIMIT $1 OFFSET $2`,
-        [config.itemsPerPage, offset]
-    );
-    const data = helper.emptyOrRows(result.rows)
-    const meta = {page};
+    const exist =  await client.exists(environment.redisKeys.galleryProduct.getPage);
+    if (!exist) {
+        console.log("querry");
+        const result = await db.query(
+            'fetch_gallery_product',
+            `SELECT * FROM gallery_product LIMIT $1 OFFSET $2`,
+            [config.itemsPerPage, offset]
+        );
+        const data = helper.emptyOrRows(result.rows)
+        const meta = {page};
 
-    return {
-        data,
-        meta
-    };
+        await client.set(environment.redisKeys.galleryProduct.getPage, JSON.stringify({
+            data,
+            meta
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+            meta
+        };
+    } else {
+        console.log("cache");
+        const result = await client.get(environment.redisKeys.galleryProduct.getPage);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 
@@ -41,8 +64,7 @@ async function create(galleryProduct: GalleryProduct) {
 
     if (result) {
         message = 'product created successfully';
-    } else {
-        message = 'Error in creating product';
+        await client.del(environment.redisKeys.galleryProduct.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);
@@ -77,8 +99,7 @@ async function createMultiple(galleryProducts: GalleryProduct[]) {
 
     if (result && result.rows.length > 0) {
         message = 'galleryProducts created successfully';
-    } else {
-        message = 'Error in creating galleryProducts';
+        await client.del(environment.redisKeys.galleryProduct.getPage);
     }
 
     const data = helper.emptyOrRows(result.rows);

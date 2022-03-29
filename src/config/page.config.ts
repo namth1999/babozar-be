@@ -1,5 +1,5 @@
 const page = {
- itemsPerPage: 2
+ itemsPerPage: 10
 };
 
 module.exports = page;
