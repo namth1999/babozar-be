@@ -1,7 +1,10 @@
 import express, {Express, NextFunction, Request, Response} from 'express';
 import http from 'http';
+import https from 'https';
 import morgan from 'morgan';
 import ip from "ip";
+import * as fs from "fs";
+import * as path from "path";
 
 const bodyParser = require('body-parser');
 const brandRouter = require('./routes/brand.route');
@@ -62,6 +65,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     return res.status(404).json("Not Found");
 });
 
-const httpServer = http.createServer(app);
+
+const options = {
+    key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'))
+};
+
 const PORT: any = process.env.PORT ?? 3000;
-httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+https.createServer(options, app).listen(PORT, () => console.log(`The server is running on port ${PORT}`));
