@@ -1,5 +1,4 @@
 import express, {Express, NextFunction, Request, Response} from 'express';
-import http from 'http';
 import https from 'https';
 import morgan from 'morgan';
 import ip from "ip";
@@ -49,7 +48,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/brand", keycloak.protect(), brandRouter);
-app.use("/address", keycloak.protect(), addressRouter);
+app.use("/address", addressRouter);
 app.use("/category", keycloak.protect(), categoryRouter);
 app.use("/dietary", keycloak.protect(), dietaryRouter);
 app.use("/childrencategory", keycloak.protect(), childrenCategoryRouter);
@@ -72,4 +71,4 @@ const options = {
 };
 
 const PORT: any = process.env.PORT ?? 3000;
-http.createServer(app).listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+https.createServer(options, app).listen(PORT, () => console.log(`The server is running on port ${PORT}`));
