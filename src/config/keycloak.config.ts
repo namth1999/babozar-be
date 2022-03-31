@@ -7,7 +7,7 @@ const memoryStore = new session.MemoryStore();
 let keycloakConfig = {
     clientId: 'BoroBazar',
     bearerOnly: true,
-    serverUrl: 'http://ec2-3-65-36-66.eu-central-1.compute.amazonaws.com:8080/auth',
+    serverUrl: 'https://ec2-3-65-36-66.eu-central-1.compute.amazonaws.com:8443/auth',
     realm: 'nodejs-keycloak-aws',
     credentials: {
         secret: 'hfpH5YM99OBtVY71DFiCAVbyptuYgKHf'
