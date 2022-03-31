@@ -48,7 +48,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/brand", keycloak.protect(), brandRouter);
-app.use("/address", addressRouter);
+app.use("/address", keycloak.protect(), addressRouter);
 app.use("/category", keycloak.protect(), categoryRouter);
 app.use("/dietary", keycloak.protect(), dietaryRouter);
 app.use("/childrencategory", keycloak.protect(), childrenCategoryRouter);
