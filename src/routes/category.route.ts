@@ -5,6 +5,7 @@ const categoryController = require('../controllers/category.controller');
 
 /* GET programming languages. */
 router.get('/', categoryController.getPage);
+router.get('/getAll', categoryController.getAll);
 
 /* POST programming language */
 router.post('/', categoryController.create);

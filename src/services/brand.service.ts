@@ -44,6 +44,36 @@ async function getPage(page = 1) {
     }
 }
 
+async function getAll() {
+    const exist =  await client.exists(environment.redisKeys.brand.getAll);
+    if (!exist) {
+        const result = await db.query(
+            'fetch_brands',
+            `SELECT * FROM brand`,
+            []
+        );
+        const data = helper.emptyOrRows(result.rows)
+
+        await client.set(environment.redisKeys.brand.getAll, JSON.stringify({
+            data,
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.brand.getAll);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
+}
+
 async function create(brand : Brand) {
     let result = await db.query(
         'insert-brand',
@@ -92,6 +122,7 @@ async function createMultiple(brands: Brand[]) {
 
 module.exports = {
     getPage,
+    getAll,
     create,
     createMultiple,
 }

@@ -5,7 +5,8 @@ export const environment = {
             getPage: "ADDRESS_GET_PAGE"
         },
         brand: {
-            getPage: "BRAND_GET_PAGE"
+            getPage: "BRAND_GET_PAGE",
+            getAll: "BRAND_GET_ALL"
         },
         category: {
             getPage: "CATEGORY_GET_PAGE"
