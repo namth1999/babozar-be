@@ -13,6 +13,7 @@ export NVM_DIR="$HOME/.nvm"
 
 #install node modules
 npm install
+pm2 install typescript
 
 #start our node app in the background
 pm2 start src/server.ts
