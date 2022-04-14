@@ -44,6 +44,36 @@ async function getPage(page = 1) {
     }
 }
 
+async function getAll() {
+    const exist =  await client.exists(environment.redisKeys.category.getAll);
+    if (!exist) {
+        const result = await db.query(
+            'fetch_category',
+            `SELECT * FROM category`,
+            []
+        );
+        const data = helper.emptyOrRows(result.rows)
+
+        await client.set(environment.redisKeys.category.getAll, JSON.stringify({
+            data,
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.category.getAll);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
+}
+
 
 async function create(category : Category) {
     if (!category) {
@@ -110,6 +140,7 @@ async function createMultiple(categories: Category[]) {
 
 module.exports = {
     getPage,
+    getAll,
     create,
     createMultiple,
 }

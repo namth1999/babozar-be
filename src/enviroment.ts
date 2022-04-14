@@ -9,7 +9,8 @@ export const environment = {
             getAll: "BRAND_GET_ALL"
         },
         category: {
-            getPage: "CATEGORY_GET_PAGE"
+            getPage: "CATEGORY_GET_PAGE",
+            getAll: "CATEGORY_GET_ALL"
         },
         childrenCategory: {
             getPage: "childrenCategory_GET_PAGE"
