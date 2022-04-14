@@ -18,6 +18,7 @@ const tagRouter = require('./routes/tag.route');
 const orderRouter = require('./routes/order.route');
 const tagProductRouter = require('./routes/tagProduct.route');
 const orderProductRouter = require('./routes/orderProduct.route');
+const publicRouter = require('./routes/public.route');
 const cors = require('cors');
 const keycloakConfig = require('./config/keycloak.config');
 const session = require('express-session');
@@ -59,6 +60,7 @@ app.use("/tag", keycloak.protect(), tagRouter);
 app.use("/order", keycloak.protect(), orderRouter);
 app.use("/tagproduct", keycloak.protect(), tagProductRouter);
 app.use("/orderproduct", keycloak.protect(), orderProductRouter);
+app.use("/public",  publicRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     return res.status(404).json("Not Found");
