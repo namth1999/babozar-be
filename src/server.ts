@@ -44,7 +44,7 @@ app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
     return res.status(200).json({
-        message: `Hello from root hehe 2 ${ip.address("public")}`
+        message: `Hello from root hehe ${ip.address("public")}`
     });
 });
 
