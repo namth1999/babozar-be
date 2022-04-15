@@ -20,4 +20,4 @@ npm install
 pm2 install typescript
 
 #start our node app in the background
-pm2 start src/server.ts
+pm2 start src/server.ts -f
