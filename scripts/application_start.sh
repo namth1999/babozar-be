@@ -23,4 +23,4 @@ pm2 install typescript
 pm2 start src/server.ts
 
 cd /home/ec2-user/keycloak-17.0.0/bin
-sudo nohup ./standalone.sh -b 172.31.44.147
+sudo nohup ./standalone.sh
