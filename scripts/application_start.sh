@@ -21,6 +21,3 @@ pm2 install typescript
 
 #start our node app in the background
 pm2 start src/server.ts
-
-cd /home/ec2-user/keycloak-17.0.0/bin
-sudo nohup ./standalone.sh
