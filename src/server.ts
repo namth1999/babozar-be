@@ -60,7 +60,7 @@ app.use("/tag", keycloak.protect(), tagRouter);
 app.use("/order", keycloak.protect(), orderRouter);
 app.use("/tagproduct", keycloak.protect(), tagProductRouter);
 app.use("/orderproduct", keycloak.protect(), orderProductRouter);
-app.use("/public",  publicRouter);
+app.use("/public", publicRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     return res.status(404).json("Not Found");

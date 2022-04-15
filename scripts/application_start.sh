@@ -2,7 +2,11 @@
 
 #give permission for everything in the express-app directory
 sudo chmod -R 777 /home/ec2-user/babozar-be
+sudo chmod -R 777 /home/ec2-user/redis-stable
+sudo chmod -R 777 /home/ec2-user/keycloak-17.0.0
 
+cd /home/ec2-user/redis-stable
+src/redis-server --daemonize yes
 #navigate into our working directory where we have all our github files
 cd /home/ec2-user/babozar-be
 
@@ -17,3 +21,6 @@ pm2 install typescript
 
 #start our node app in the background
 pm2 start src/server.ts
+
+cd /home/ec2-user/keycloak-17.0.0/bin
+sudo nohup ./bin/standalone.sh -b 172.31.44.147
