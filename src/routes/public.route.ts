@@ -7,7 +7,7 @@ const productController = require('../controllers/product.controller');
 /* GET programming languages. */
 router.get('/category/getAll', categoryController.getAll);
 
-router.get('/category/getHomeBestProducts', productController.getHomeBestProducts);
+router.get('/product/getHomeBestProducts', productController.getHomeBestProducts);
 
 router.use(errorMiddleware);
 

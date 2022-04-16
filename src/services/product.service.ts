@@ -46,11 +46,11 @@ async function getPage(page = 1) {
 
 
 async function getHomeBestProducts() {
-    const exist =  await client.exists(environment.redisKeys.product.getHomeBestProduct);
+    const exist =  false;
     if (!exist) {
         const result = await db.query(
             'fetch_best_products',
-            `SELECT * FROM product LIMIT $1`,
+            `SELECT * FROM product where best_seller = true LIMIT $1`,
             [config.limitHomeBestProducts]
         );
         const data = helper.emptyOrRows(result.rows)
