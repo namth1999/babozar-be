@@ -1,4 +1,4 @@
-import express, {Express, NextFunction, Request, Response} from 'express';
+import express, {Express, Request, Response} from 'express';
 import https from 'https';
 import morgan from 'morgan';
 import ip from "ip";
@@ -44,7 +44,7 @@ app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
     return res.status(200).json({
-        message: `Hello from root hehe 23 ${ip.address("public")}`
+        message: `Hello from root hehe ${ip.address("public")}`
     });
 });
 
@@ -62,7 +62,7 @@ app.use("/tagproduct", keycloak.protect(), tagProductRouter);
 app.use("/orderproduct", keycloak.protect(), orderProductRouter);
 app.use("/public", publicRouter);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, res: Response) => {
     return res.status(404).json("Not Found");
 });
 
