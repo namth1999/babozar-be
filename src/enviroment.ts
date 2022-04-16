@@ -10,7 +10,7 @@ export const environment = {
         },
         category: {
             getPage: "CATEGORY_GET_PAGE",
-            getAll: "CATEGORY_GET_ALL"
+            getAll: "CATEGORY_GET_ALL",
         },
         childrenCategory: {
             getPage: "childrenCategory_GET_PAGE"
@@ -28,7 +28,9 @@ export const environment = {
             getPage: "orderProduct_GET_PAGE"
         },
         product: {
-            getPage: "product_GET_PAGE"
+            getPage: "product_GET_PAGE",
+            getHomeBestProduct: "product_GET_HOME_BESTSELLER_PRODUCT"
+
         },
         shop: {
             getPage: "shop_GET_PAGE"

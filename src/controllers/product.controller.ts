@@ -12,6 +12,15 @@ async function getPage(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+async function getHomeBestProducts(req: Request, res: Response, next: NextFunction) {
+    try {
+        res.status(200).json(await productService.getHomeBestProducts());
+    } catch (err: any) {
+        console.error(`Error while getting home best products`, err.message);
+        next(new HttpException(400, err.message));
+    }
+}
+
 async function create(req: Request, res: Response, next: NextFunction) {
     try {
         res.json(await productService.create(req.body));
@@ -33,6 +42,7 @@ async function createMultiple(req: Request, res: Response, next: NextFunction) {
 
 module.exports = {
     getPage,
+    getHomeBestProducts,
     create,
     createMultiple,
 };

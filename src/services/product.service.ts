@@ -45,6 +45,37 @@ async function getPage(page = 1) {
 }
 
 
+async function getHomeBestProducts() {
+    const exist =  await client.exists(environment.redisKeys.product.getHomeBestProduct);
+    if (!exist) {
+        const result = await db.query(
+            'fetch_best_products',
+            `SELECT * FROM product LIMIT $1`,
+            [config.limitHomeBestProducts]
+        );
+        const data = helper.emptyOrRows(result.rows)
+
+        await client.set(environment.redisKeys.product.getHomeBestProduct, JSON.stringify({
+            data,
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.product.getHomeBestProduct);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
+}
+
+
 async function create(product : Product) {
     if (!product) {
         throw new Error('Error in creating product. Empty body');
@@ -107,6 +138,7 @@ async function createMultiple(products: Product[]) {
 
 module.exports = {
     getPage,
+    getHomeBestProducts,
     create,
     createMultiple,
 }
