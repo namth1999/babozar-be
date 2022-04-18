@@ -92,6 +92,7 @@ async function create(category : Category) {
     if (result) {
         message = 'Category created successfully';
         await client.del(environment.redisKeys.category.getPage);
+        await client.del(environment.redisKeys.category.getAll);
     }
 
     const data = helper.emptyOrRows(result.rows);
@@ -128,6 +129,7 @@ async function createMultiple(categories: Category[]) {
     if (result && result.rows.length > 0) {
         message = 'categories created successfully';
         await client.del(environment.redisKeys.category.getPage);
+        await client.del(environment.redisKeys.category.getAll);
     }
 
     const data = helper.emptyOrRows(result.rows);
