@@ -7,7 +7,7 @@ const memoryStore = new session.MemoryStore();
 let keycloakConfig = {
     clientId: 'BoroBazar',
     bearerOnly: true,
-    serverUrl: 'https://ec2-3-65-36-66.eu-central-1.compute.amazonaws.com:8443/auth',
+    serverUrl: 'https://ec2-52-57-113-98.eu-central-1.compute.amazonaws.com:8443/auth',
     realm: 'nodejs-keycloak-aws',
     realmPublicKey: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAydajD6GvgAJ8zBfHtTg1xo5LVEZsii9SwcHpj3l85E+Ospg9Svg/Ap51lWnNSf2xiuN+5QmZBkz17JM52NMENqrR2EMLYvQY1XKFL+lrHdTgf3EKvpVLAl3WeEE64JNrZWwPeZh1gXfcO8K30H4qNeU+uDiPK5Fo+ObU2DuukyCV3DM+yq+ZSNVfew3MHMWqx5J52GJd6z/PIbU67lgTgdMLh5ZKWsNavBE9/cwP85Xhhfg1iQsc6KnzUfrk13VBP9IMtSFjyDNh+wz84tKM+vvzRkhUFWTEfTqgt5yUkPQ8Nbc7c25iuFT80pYZ32WlwY6sl40oZCMP2O9oZPNvEQIDAQAB'
 };
