@@ -25,9 +25,8 @@ async function getPage(page = 1) {
         await client.set(environment.redisKeys.product.getPage, JSON.stringify({
             data,
             meta
-        }), {
-            EX: 3600,
-        });
+        }));
+        await client.expire(environment.redisKeys.product.getPage, 3600)
 
         return {
             data,
@@ -56,9 +55,8 @@ async function getHomeBestProducts() {
 
         await client.set(environment.redisKeys.product.getHomeBestProduct, JSON.stringify({
             data,
-        }), {
-            EX: 3600,
-        });
+        }));
+        await client.expire(environment.redisKeys.product.getHomeBestProduct, 3600)
 
         return {
             data,

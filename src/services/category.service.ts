@@ -25,10 +25,8 @@ async function getPage(page = 1) {
         await client.set(environment.redisKeys.category.getPage, JSON.stringify({
             data,
             meta
-        }), {
-            EX: 3600,
-            NX: true,
-        } );
+        }));
+        await client.expire(environment.redisKeys.category.getPage, 3600);
 
         return {
             data,
@@ -56,10 +54,8 @@ async function getAll() {
 
         await client.set(environment.redisKeys.category.getAll, JSON.stringify({
             data,
-        }), {
-            EX: 3600,
-            NX: true,
-        } );
+        }));
+        await client.expire(environment.redisKeys.category.getAll, 3600);
 
         return {
             data,

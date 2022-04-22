@@ -12,7 +12,7 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const exist =  await client.exists(environment.redisKeys.brand.getPage);
+    const exist = await client.exists(environment.redisKeys.brand.getPage);
     if (!exist) {
         const result = await db.query(
             'fetch_brands',
@@ -25,10 +25,8 @@ async function getPage(page = 1) {
         await client.set(environment.redisKeys.brand.getPage, JSON.stringify({
             data,
             meta
-        }), {
-            EX: 3600,
-            NX: true,
-        } );
+        }));
+        await client.expire(environment.redisKeys.brand.getPage, 3600);
 
         return {
             data,
@@ -45,7 +43,7 @@ async function getPage(page = 1) {
 }
 
 
-async function create(brand : Brand) {
+async function create(brand: Brand) {
     let result = await db.query(
         'insert-brand',
         `INSERT INTO brand VALUES($1,$2,$3) RETURNING *`,

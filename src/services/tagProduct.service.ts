@@ -24,11 +24,8 @@ async function getPage(page = 1) {
 
         await client.set(environment.redisKeys.tagProduct.getPage, JSON.stringify({
             data,
-            meta
-        }), {
-            EX: 3600,
-            NX: true,
-        } );
+        }));
+        await client.expire(environment.redisKeys.tagProduct.getPage, 3600);
 
         return {
             data,
