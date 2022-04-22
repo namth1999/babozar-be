@@ -25,7 +25,7 @@ async function getPage(page = 1) {
         await client.set(environment.redisKeys.order.getPage, JSON.stringify({
             data,
         }));
-        await client.expire(environment.redisKeys.order.getPage, 3600);
+        await client.expire(environment.redisKeys.order.getPage, 60);
 
         return {
             data,

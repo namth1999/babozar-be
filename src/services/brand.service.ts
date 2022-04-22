@@ -26,7 +26,7 @@ async function getPage(page = 1) {
             data,
             meta
         }));
-        await client.expire(environment.redisKeys.brand.getPage, 3600);
+        await client.expire(environment.redisKeys.brand.getPage, 60);
 
         return {
             data,
