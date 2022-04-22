@@ -27,7 +27,6 @@ async function getPage(page = 1) {
             meta
         }), {
             EX: 3600,
-            NX: true,
         });
 
         return {
@@ -57,7 +56,6 @@ async function getHomeBestProducts() {
         data,
     }), {
         EX: 3600,
-        NX: true,
     });
 
     return {
