@@ -20,6 +20,4 @@ npm install
 pm2 install typescript
 
 #start our node app in the background
-pm2 start src/server.ts -f
-
-cd /home/ec2-user/keycloak-17.0.0
+pm2 start src/server.ts

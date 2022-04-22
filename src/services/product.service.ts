@@ -46,7 +46,7 @@ async function getPage(page = 1) {
 
 
 async function getHomeBestProducts() {
-    const exist =  false;
+    const exist =  await client.exists(environment.redisKeys.product.getHomeBestProduct);
     if (!exist) {
         const result = await db.query(
             'fetch_best_products',
@@ -67,6 +67,42 @@ async function getHomeBestProducts() {
         };
     } else {
         const result = await client.get(environment.redisKeys.product.getHomeBestProduct);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
+}
+
+async function searchProducts (keyword: string) {
+    const exist =  client.exists(environment.redisKeys.product.searchProducts);
+    if (!exist) {
+        const searchPhrase = keyword.split(" ").reduce((pre, current) => {
+            if (!pre)
+                return current
+            return `${pre} & ${current}`;
+        }, "");
+        const result = await db.query(
+            'search_products',
+            `select * from product where to_tsvector(name) @@ to_tsquery($1)
+                       or to_tsvector(description) @@ to_tsquery($1) order by name`,
+            [searchPhrase]
+        );
+        const data = helper.emptyOrRows(result.rows)
+
+        await client.set(environment.redisKeys.product.searchProducts, JSON.stringify({
+            data,
+        }), {
+            EX: 3600,
+            NX: true,
+        } );
+
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.product.searchProducts);
         if (result) {
             return JSON.parse(result);
         } else {
@@ -138,6 +174,7 @@ async function createMultiple(products: Product[]) {
 
 module.exports = {
     getPage,
+    searchProducts,
     getHomeBestProducts,
     create,
     createMultiple,

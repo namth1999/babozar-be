@@ -8,6 +8,7 @@ const productController = require('../controllers/product.controller');
 router.get('/category/getAll', categoryController.getAll);
 
 router.get('/product/getHomeBestProducts', productController.getHomeBestProducts);
+router.get('/product/search', productController.getHomeBestProducts);
 
 router.use(errorMiddleware);
 

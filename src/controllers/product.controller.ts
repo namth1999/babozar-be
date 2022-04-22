@@ -21,6 +21,15 @@ async function getHomeBestProducts(req: Request, res: Response, next: NextFuncti
     }
 }
 
+async function searchProducts(req: Request, res: Response, next: NextFunction) {
+    try {
+        res.status(200).json(await productService.searchProducts(req.body.keyword));
+    } catch (err: any) {
+        console.error(`Error while getting home best products`, err.message);
+        next(new HttpException(400, err.message));
+    }
+}
+
 async function create(req: Request, res: Response, next: NextFunction) {
     try {
         res.json(await productService.create(req.body));
@@ -42,6 +51,7 @@ async function createMultiple(req: Request, res: Response, next: NextFunction) {
 
 module.exports = {
     getPage,
+    searchProducts,
     getHomeBestProducts,
     create,
     createMultiple,

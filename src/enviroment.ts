@@ -29,7 +29,8 @@ export const environment = {
         },
         product: {
             getPage: "product_GET_PAGE",
-            getHomeBestProduct: "product_GET_HOME_BESTSELLER_PRODUCT"
+            getHomeBestProduct: "product_GET_HOME_BESTSELLER_PRODUCT",
+            searchProducts: "product_search_Products"
 
         },
         shop: {
