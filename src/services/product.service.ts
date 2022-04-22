@@ -12,7 +12,7 @@ const {v4: uuidv4} = require("uuid");
 async function getPage(page = 1) {
     const offset = helper.getOffset(page, config.itemsPerPage);
 
-    const exist =  await client.exists(environment.redisKeys.product.getPage);
+    const exist = await client.exists(environment.redisKeys.product.getPage);
     if (!exist) {
         const result = await db.query(
             'fetch_product',
@@ -28,7 +28,7 @@ async function getPage(page = 1) {
         }), {
             EX: 3600,
             NX: true,
-        } );
+        });
 
         return {
             data,
@@ -46,7 +46,7 @@ async function getPage(page = 1) {
 
 
 async function getHomeBestProducts() {
-    const exist =  await client.exists(environment.redisKeys.product.getHomeBestProduct);
+    const exist = await client.exists(environment.redisKeys.product.getHomeBestProduct);
     if (!exist) {
         const result = await db.query(
             'fetch_best_products',
@@ -60,7 +60,7 @@ async function getHomeBestProducts() {
         }), {
             EX: 3600,
             NX: true,
-        } );
+        });
 
         return {
             data,
@@ -75,44 +75,26 @@ async function getHomeBestProducts() {
     }
 }
 
-async function searchProducts (keyword: string) {
-    const exist =  client.exists(environment.redisKeys.product.searchProducts);
-    if (!exist) {
-        const searchPhrase = keyword.split(" ").reduce((pre, current) => {
-            if (!pre)
-                return current
-            return `${pre} & ${current}`;
-        }, "");
-        const result = await db.query(
-            'search_products',
-            `select * from product where to_tsvector(name) @@ to_tsquery($1)
+async function searchProducts(keyword: string) {
+    const searchPhrase = keyword.split(" ").reduce((pre, current) => {
+        if (!pre)
+            return current
+        return `${pre} & ${current}`;
+    }, "");
+    const result = await db.query(
+        'search_products',
+        `select * from product where to_tsvector(name) @@ to_tsquery($1)
                        or to_tsvector(description) @@ to_tsquery($1) order by name`,
-            [searchPhrase]
-        );
-        const data = helper.emptyOrRows(result.rows)
-
-        await client.set(environment.redisKeys.product.searchProducts, JSON.stringify({
-            data,
-        }), {
-            EX: 3600,
-            NX: true,
-        } );
-
-        return {
-            data,
-        };
-    } else {
-        const result = await client.get(environment.redisKeys.product.searchProducts);
-        if (result) {
-            return JSON.parse(result);
-        } else {
-            throw new HttpException(500, "Empty cache")
-        }
-    }
+        [searchPhrase]
+    );
+    const data = helper.emptyOrRows(result.rows)
+    return {
+        data,
+    };
 }
 
 
-async function create(product : Product) {
+async function create(product: Product) {
     if (!product) {
         throw new Error('Error in creating product. Empty body');
     }
@@ -121,7 +103,7 @@ async function create(product : Product) {
     const entries = Object.keys(product);
     let result = await db.query(
         'insert-product',
-        format('INSERT INTO product (%s) VALUES %L RETURNING *',entries.toString(), values),
+        format('INSERT INTO product (%s) VALUES %L RETURNING *', entries.toString(), values),
         []);
 
     let message;
@@ -153,7 +135,7 @@ async function createMultiple(products: Product[]) {
 
     let result = await db.query(
         'insert-products',
-        format('INSERT INTO product (%s) VALUES %L RETURNING *',entries.toString(), values),
+        format('INSERT INTO product (%s) VALUES %L RETURNING *', entries.toString(), values),
         []
     )
 
