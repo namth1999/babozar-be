@@ -45,22 +45,32 @@ async function getPage(page = 1) {
 
 
 async function getHomeBestProducts() {
-    const result = await db.query(
-        'fetch_best_products',
-        `SELECT * FROM product where best_seller = true LIMIT $1`,
-        [config.limitHomeBestProducts]
-    );
-    const data = helper.emptyOrRows(result.rows)
+    const exist = await client.exists(environment.redisKeys.product.getHomeBestProduct);
+    if (!exist) {
+        const result = await db.query(
+            'fetch_best_products',
+            `SELECT * FROM product where best_seller = true LIMIT $1`,
+            [config.limitHomeBestProducts]
+        );
+        const data = helper.emptyOrRows(result.rows)
 
-    await client.set(environment.redisKeys.product.getHomeBestProduct, JSON.stringify({
-        data,
-    }), {
-        EX: 3600,
-    });
+        await client.set(environment.redisKeys.product.getHomeBestProduct, JSON.stringify({
+            data,
+        }), {
+            EX: 3600,
+        });
 
-    return {
-        data,
-    };
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.product.getHomeBestProduct);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 async function searchProducts(keyword: string) {
