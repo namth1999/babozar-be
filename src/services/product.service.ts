@@ -71,6 +71,34 @@ async function getHomeBestProducts() {
     }
 }
 
+async function getProductById(id: string) {
+    const exist = await client.exists(environment.redisKeys.product.getProductById);
+    if (!exist) {
+        const result = await db.query(
+            'fetch_product_by_id',
+            `SELECT * FROM product where id = $1`,
+            [id]
+        );
+        const data = helper.emptyOrRows(result.rows)
+
+        await client.set(environment.redisKeys.product.getProductById, JSON.stringify({
+            data,
+        }));
+        await client.expire(environment.redisKeys.product.getProductById, 60);
+
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.product.getProductById);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
+}
+
 async function searchProducts(keyword: string) {
     const searchPhrase = keyword.split(" ").reduce((pre, current) => {
         if (!pre)
@@ -154,6 +182,7 @@ module.exports = {
     getPage,
     searchProducts,
     getHomeBestProducts,
+    getProductById,
     create,
     createMultiple,
 }
