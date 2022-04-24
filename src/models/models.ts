@@ -78,7 +78,7 @@ export interface Product {
 
 export interface ProductRelatedBody {
     id?: string;
-    categoryID: string;
+    categoryId: string;
     tags: string[];
 }
 

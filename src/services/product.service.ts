@@ -109,15 +109,36 @@ async function getRelatedProducts(product: ProductRelatedBody) {
     const values = product.tags.reduce((pre, current) =>
             pre.concat(` or lower(t.name) like lower(concat('%','${current}','%')) `)
     , '');
-
-    console.log(format(`select distinct p.id, p.name, p.slug, p.price, p.sale_price, p.flash_sale, p.unit, category_id,
+    if (!exist) {
+        const result = await db.query(
+            'fetch_related_product',
+            format(`select distinct p.id, p.name, p.slug, p.price, p.sale_price, p.flash_sale, p.unit, category_id,
                 string_agg(t.name, ', ' ORDER BY t.name) p_tags
                 from product p
                 inner join tag_product tp on tp.product_id = p.id
                 inner join tag t on tp.tag_id = t.id
                 where category_id = %L %s
-                group by p.id
-`, product.categoryID, values));
+                group by p.id`, product.categoryId, values),
+            []
+        );
+        const data = helper.emptyOrRows(result.rows)
+
+        await client.set(environment.redisKeys.product.getRelatedProducts(product.id), JSON.stringify({
+            data,
+        }));
+        await client.expire(environment.redisKeys.product.getRelatedProducts(product.id), 60);
+
+        return {
+            data,
+        };
+    } else {
+        const result = await client.get(environment.redisKeys.product.getRelatedProducts(product.id));
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            throw new HttpException(500, "Empty cache")
+        }
+    }
 }
 
 async function searchProducts(keyword: string) {
