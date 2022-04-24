@@ -10,6 +10,7 @@ router.get('/category/getAll', categoryController.getAll);
 router.get('/product/getHomeBestProducts', productController.getHomeBestProducts);
 router.post('/product/search', productController.searchProducts);
 router.post('/product/getProductById', productController.getProductById);
+router.post('/product/getRelatedProducts', productController.getRelatedProducts);
 
 router.use(errorMiddleware);
 

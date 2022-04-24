@@ -76,6 +76,12 @@ export interface Product {
     categoryID: string;
 }
 
+export interface ProductRelatedBody {
+    id?: string;
+    categoryID: string;
+    tags: string[];
+}
+
 export interface Shop {
     id?: string;
     ownerID: string;

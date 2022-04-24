@@ -30,6 +30,15 @@ async function getProductById(req: Request, res: Response, next: NextFunction) {
     }
 }
 
+async function getRelatedProducts(req: Request, res: Response, next: NextFunction) {
+    try {
+        res.status(200).json(await productService.getRelatedProducts(req.body));
+    } catch (err: any) {
+        console.error(`Error while getting home best products`, err.message);
+        next(new HttpException(400, err.message));
+    }
+}
+
 async function searchProducts(req: Request, res: Response, next: NextFunction) {
     try {
         res.status(200).json(await productService.searchProducts(req.body.keyword));
@@ -63,6 +72,7 @@ module.exports = {
     searchProducts,
     getProductById,
     getHomeBestProducts,
+    getRelatedProducts,
     create,
     createMultiple,
 };

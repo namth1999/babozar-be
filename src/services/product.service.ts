@@ -1,4 +1,4 @@
-import {Product} from "../models/models";
+import {Product, ProductRelatedBody} from "../models/models";
 import client from "../config/redisCache.config";
 import {environment} from "../enviroment";
 import HttpException from "../utils/HttpException";
@@ -72,31 +72,52 @@ async function getHomeBestProducts() {
 }
 
 async function getProductById(id: string) {
-    const exist = await client.exists(environment.redisKeys.product.getProductById);
+    const exist = await client.exists(environment.redisKeys.product.getProductById(id));
     if (!exist) {
         const result = await db.query(
             'fetch_product_by_id',
-            `SELECT * FROM product where id = $1`,
+            `select distinct p.id, p.name, p.slug, p.price, p.sale_price, p.flash_sale, p.unit, string_agg(t.name, ', ' ORDER BY t.name) p_tags
+            from product p
+            inner join tag_product tp on tp.product_id = p.id
+            inner join tag t on tp.tag_id = t.id
+            where p.id = $1
+            group by p.id`,
             [id]
         );
         const data = helper.emptyOrRows(result.rows)
 
-        await client.set(environment.redisKeys.product.getProductById, JSON.stringify({
+        await client.set(environment.redisKeys.product.getProductById(id), JSON.stringify({
             data,
         }));
-        await client.expire(environment.redisKeys.product.getProductById, 60);
+        await client.expire(environment.redisKeys.product.getProductById(id), 60);
 
         return {
             data,
         };
     } else {
-        const result = await client.get(environment.redisKeys.product.getProductById);
+        const result = await client.get(environment.redisKeys.product.getProductById(id));
         if (result) {
             return JSON.parse(result);
         } else {
             throw new HttpException(500, "Empty cache")
         }
     }
+}
+
+async function getRelatedProducts(product: ProductRelatedBody) {
+    const exist = await client.exists(environment.redisKeys.product.getRelatedProducts(product.id));
+    const values = product.tags.reduce((pre, current) =>
+            pre.concat(` or lower(t.name) like lower(concat('%','${current}','%')) `)
+    , '');
+
+    console.log(format(`select distinct p.id, p.name, p.slug, p.price, p.sale_price, p.flash_sale, p.unit, category_id,
+                string_agg(t.name, ', ' ORDER BY t.name) p_tags
+                from product p
+                inner join tag_product tp on tp.product_id = p.id
+                inner join tag t on tp.tag_id = t.id
+                where category_id = %L %s
+                group by p.id
+`, product.categoryID, values));
 }
 
 async function searchProducts(keyword: string) {
@@ -182,6 +203,7 @@ module.exports = {
     getPage,
     searchProducts,
     getHomeBestProducts,
+    getRelatedProducts,
     getProductById,
     create,
     createMultiple,

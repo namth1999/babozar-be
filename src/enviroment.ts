@@ -31,8 +31,9 @@ export const environment = {
             getPage: "product_GET_PAGE",
             getHomeBestProduct: "product_GET_HOME_BESTSELLER_PRODUCT",
             searchProducts: "product_search_Products",
-            getProductById: "product_get_by_id"
+            getProductById: (id:string) => `product_get_by_id_${id}`,
 
+            getRelatedProducts: (id: string | undefined) => `product_get_related_products_${id}`
         },
         shop: {
             getPage: "shop_GET_PAGE"
